@@ -20,6 +20,9 @@ console.log(msg)
 
 chrome.runtime.sendMessage({text: msg}, function (response){
     console.log("Response", response);
+    window.setTimeout(function (){
+        window.location.reload()
+    }, 1000 * 60 * 10)
 })
 
 
