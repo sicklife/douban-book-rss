@@ -11,7 +11,7 @@ let review_titles = document.getElementsByTagName("h2")
 let book_imgs = document.getElementsByClassName("subject-img")
 let msg = ""
 
-for (let i = 0; i < review_titles.length; i++) {
+for (let i = review_titles.length - 1; i >= 0; i--) {
     msg += "【" + book_imgs[i].children[0].alt + "】";
     msg += review_titles[i].innerText + "\n";
     msg += review_titles[i].children[0].href + "\n";
