@@ -41,16 +41,22 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse){
         console.log(value)
         book_review_list = value.book_review || [];
         console.log(book_review_list)
-        let review_msg = message.text;
+        let review_msg = message.text.trim();
         let review_msg_list = review_msg.split("\n");
+        console.log("review_msg_list 长度", review_msg_list.length)
+        let review_msg_num = review_msg_list.length / 2
         let new_review_lit = [];
-        for (let i = 0; i < review_msg_list.length; i++) {
-            let line = review_msg_list[i];
-            if(book_review_list.includes(line)){
+        for (let i = 0; i < review_msg_num; i++) {
+            let title = review_msg_list[2*i];
+            let href = review_msg_list[2*i + 1]
+            console.log(title, href)
+            if(book_review_list.includes(title) && book_review_list.includes(href)){
             }else{
                 // console.log(book_review_list.includes(line), line)
-                book_review_list.push(line)
-                new_review_lit.push(line)
+                book_review_list.push(title)
+                book_review_list.push(href)
+                new_review_lit.push(title)
+                new_review_lit.push(href)
             }
         }
         book_review_list = book_review_list.slice(-20);
