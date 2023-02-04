@@ -35,49 +35,58 @@ chrome.webNavigation.onCompleted.addListener(() => {
 let book_review_list = [];
 let counter = 0
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse){
-    console.log("Message received!", message.text)
-    chrome.storage.local.get(["book_review"]).then((value)=>{
-        console.log(value)
-        book_review_list = value.book_review || [];
-        console.log(book_review_list)
-        let review_msg = message.text.trim();
-        let review_msg_list = review_msg.split("\n");
-        console.log("review_msg_list 长度", review_msg_list.length)
-        let review_msg_num = review_msg_list.length / 2
-        let new_review_lit = [];
-        for (let i = 0; i < review_msg_num; i++) {
-            let title = review_msg_list[2*i];
-            let href = review_msg_list[2*i + 1]
-            console.log(title, href)
-            if(book_review_list.includes(title) && book_review_list.includes(href)){
-            }else{
-                // console.log(book_review_list.includes(line), line)
-                book_review_list.push(title)
-                book_review_list.push(href)
-                new_review_lit.push(title)
-                new_review_lit.push(href)
-            }
+async function process_msg(msg_text){
+    let book_review_p = await chrome.storage.local.get(["book_review"])
+    let stored_book_review = book_review_p.book_review || []
+    let book_review_count_p = await chrome.storage.local.get(["book_review_count"])
+    let stored_book_review_count = book_review_count_p.book_review_count || 0
+    let review_msg = msg_text.trim();
+    let review_msg_list = review_msg.split("\n");
+    console.log("review_msg_list 长度", review_msg_list.length)
+    let review_msg_num = review_msg_list.length / 2
+    let new_review_lit = [];
+    for (let i = 0; i < review_msg_num; i++) {
+        let title = review_msg_list[2*i];
+        let href = review_msg_list[2*i + 1]
+        // console.log(title, href)
+        if(stored_book_review.includes(title) && stored_book_review.includes(href)){
+        }else{
+            stored_book_review_count += 1
+            stored_book_review.push(title)
+            stored_book_review.push(href)
+            new_review_lit.push(stored_book_review_count + ":" + title)
+            new_review_lit.push(href)
         }
-        book_review_list = book_review_list.slice(-20);
-        chrome.storage.local.set({book_review: book_review_list}).then(()=>{
-            console.log("save finished.")
-        })
+    }
+    stored_book_review = stored_book_review.slice(-20);
+    let store_p = chrome.storage.local.set(
+        {
+            book_review: stored_book_review,
+            book_review_count: stored_book_review_count
+        });
+    await store_p
+    console.log("save finished~")
+    let wx_msg;
+    if(new_review_lit.length>0){
+        wx_msg = new_review_lit.join("\n");
+        postData('https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=d31e5a41-45bd-4ae6-910e-6c0f46905f6e',
+            // { "msgtype": "text", "text": {"content": message.text} })
+            { "msgtype": "text", "text": {"content": wx_msg} })
+            .then(data => {
+                console.log(data); // JSON data parsed by `data.json()` call
+                new_review_lit = []
+            });
+    }else {
+        wx_msg = "没有新书评."
+        console.log(wx_msg)
+    }
+}
 
-        let wx_msg;
-        if(new_review_lit.length>0){
-            wx_msg = new_review_lit.join("\n");
-            postData('https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=d31e5a41-45bd-4ae6-910e-6c0f46905f6e',
-                // { "msgtype": "text", "text": {"content": message.text} })
-                { "msgtype": "text", "text": {"content": wx_msg} })
-                .then(data => {
-                    console.log(data); // JSON data parsed by `data.json()` call
-                    new_review_lit = []
-                });
-        }else {
-            wx_msg = "没有新书评."
-            console.log(wx_msg)
-        }
+
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse){
+    console.log("Receive msg from content.js\n", message.text.slice(0, 50), "\n....")
+    process_msg(message.text).then((value)=>{
+        console.log("process msg in async function finished.", value)
     })
     sendResponse("收到！");
 })
