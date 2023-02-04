@@ -3,6 +3,8 @@
 
 你好
 
+# update
+1. 2023-02-04 add book review count number
 
 ## ref
 1. https://stackoverflow.com/questions/13997468/how-do-i-use-webstorm-for-chrome-extension-development
