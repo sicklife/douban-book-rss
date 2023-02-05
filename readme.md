@@ -3,8 +3,13 @@
 
 你好
 
-# update
+## update
 1. 2023-02-04 add book review count number
+
+## TODO
+- [ ] increase book review store
+- [ ] add costume api addr
+- [ ] save to mysql
 
 ## ref
 1. https://stackoverflow.com/questions/13997468/how-do-i-use-webstorm-for-chrome-extension-development

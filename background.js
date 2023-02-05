@@ -58,7 +58,7 @@ async function process_msg(msg_text){
             new_review_lit.push(href)
         }
     }
-    stored_book_review = stored_book_review.slice(-20);
+    stored_book_review = stored_book_review.slice(-100);
     let store_p = chrome.storage.local.set(
         {
             book_review: stored_book_review,
